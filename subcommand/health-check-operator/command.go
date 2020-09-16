@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	numRetries = 10
+	numRetries = 10 // The number of requeue retries and attempts to read the svc before erroring out
 )
 
 // Command is the command for running the Health Checks Kubernetes Operator
@@ -137,15 +137,12 @@ func (c *Command) Run(args []string) int {
 		Clientset:          c.clientset,
 		ConsulPort:         consulPort,
 	}
-	// This is used by the controller's own health check
+	// This is used by the operator's health check
 	c.ControllerClient, err = c.http.APIClient()
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("Error retrieving client connection for controller: %s", err))
 		return 1
 	}
-	// construct the Controller object which has all of the necessary components to
-	// handle logging, connections, informing (listing and watching), the queue,
-	// and the handler
 	// Build the controller and start it
 	cont := &hcko.Controller{
 		Log:        c.logger.Named("healthcheckController"),
@@ -157,8 +154,8 @@ func (c *Command) Run(args []string) int {
 		Namespace:  c.flagK8SSourceNamespace,
 	}
 
-	// Start healthcheck health handler
-	// TODO: currently a no-op because consulClient is not initiated yet
+	// Start healthcheck operator health handler, this will block the operator Ready on
+	// Consul having a leader elected.
 	go func() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/health/ready", c.handleReady)
@@ -174,6 +171,7 @@ func (c *Command) Run(args []string) int {
 	healthCh = make(chan struct{})
 	go func() {
 		defer close(healthCh)
+		cont.Init(ctx.Done())
 		cont.Run(ctx.Done())
 	}()
 
@@ -205,7 +203,6 @@ func (c *Command) interrupt() {
 	c.sigCh <- os.Interrupt
 }
 
-// TODO: fix
 const synopsis = "Sync Kubernetes Health Check transitions with Consul services."
 const help = `
 Usage: consul-k8s health-checks [options]
@@ -213,7 +210,7 @@ Usage: consul-k8s health-checks [options]
   Syncs Kubernetes Health Check Pod transitions with Consul.
   When a k8s probe fails and the Pod is marked Unhealthy the
   transition will be sent down to Consul in form of a Consul
-  TTL health check which allows Consul to direct traffic
+  TTL health check which allows Consul to direct mesh traffic
   accordingly.
 
 `

@@ -20,10 +20,16 @@ import (
 )
 
 const (
+	// labelInject is the label which is applied by the connect-inject webhook to all pods
+	// this is the key by which the controller will filter it's watch/list and reconcile code
+	labelInject = "consul.hashicorp.com/connect-inject-status"
+
 	// annotationInject is the key of the annotation that controls whether
 	// injection is explicitly enabled or disabled for a pod. This should
 	// be set to a truthy or falsy value, as parseable by strconv.ParseBool
 	annotationInject = "consul.hashicorp.com/connect-inject"
+	annotationServiceID = "consul.hashicorp.com/consul-service-id"
+	annotationConsulDestinationNamespace = "consul.hashicorp.com/consul-destination-namespace"
 )
 
 // Controller struct defines how a controller should encapsulate
@@ -46,11 +52,11 @@ func (c *Controller) setupInformer() {
 		// and later process based on seeing the pod annotation annotationInject (consul.hashicorp.com/connect-inject)
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-				options.LabelSelector = "consul-connect-inject-health-checks"
+				options.LabelSelector = "consul.hashicorp.com/consul-connect-inject-health-checks"
 				return c.Clientset.CoreV1().Pods(c.Namespace).List(ctx.Background(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-				options.LabelSelector = "consul-connect-inject-health-checks"
+				options.LabelSelector = "consul.hashicorp.com/consul-connect-inject-health-checks"
 				return c.Clientset.CoreV1().Pods(c.Namespace).Watch(ctx.Background(), options)
 			},
 		},
@@ -76,7 +82,7 @@ func (c *Controller) addEventHandlers() {
 	// Delete: handled by connect-inject webhook
 	c.Informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			// AddFunc is a no-op as we handle ObjectCreate path on the UpdateFunc
+			// AddFunc is a no-op as we handle ObjectCreate path in the UpdateFunc
 			return
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -111,19 +117,9 @@ func (c *Controller) addEventHandlers() {
 			if newPod.Status.Phase == corev1.PodRunning {
 				// Only queue events which satisfy the condition of a pod Status Condition transition
 				// from Ready/NotReady or NotReady/Ready
-				oldPodStatus := corev1.ConditionTrue
-				newPodStatus := corev1.ConditionTrue
 				// In this context "Ready" is the name of the Condition field and not the actual Status
-				for _, y := range oldPod.Status.Conditions {
-					if y.Type == "Ready" {
-						oldPodStatus = y.Status
-					}
-				}
-				for _, y := range newPod.Status.Conditions {
-					if y.Type == "Ready" {
-						newPodStatus = y.Status
-					}
-				}
+				oldPodStatus := c.getReadyStatus(oldPod)
+				newPodStatus := c.getReadyStatus(newPod)
 				// If the Pod Status has changed, we queue the newObj and set the TTL to the newObj status
 				if oldPodStatus != newPodStatus {
 					key, err := cache.MetaNamespaceKeyFunc(newObj)
@@ -139,6 +135,20 @@ func (c *Controller) addEventHandlers() {
 			return
 		},
 	})
+}
+
+func (c *Controller) getReadyStatus(pod *corev1.Pod) corev1.ConditionStatus {
+	for _, y := range pod.Status.Conditions {
+		if y.Type == "Ready" {
+			return y.Status
+		}
+	}
+	return corev1.ConditionTrue
+}
+
+// Init is used at startup to force a Reconcile phase
+func (c *Controller) Init(stopCh <-chan struct{}) {
+	c.Handle.Init()
 }
 
 // Run is the main path of execution for the controller loop
@@ -186,20 +196,18 @@ func (c *Controller) runWorker() {
 }
 
 // processNextItem retrieves each Queued item and takes the
-// necessary Handle action based off of if the item was
-// created or deleted
+// necessary Handle action based off of if the item was created, updated or deleted
 func (c *Controller) processNextItem() bool {
 	c.Log.Debug("Controller.processNextItem: start")
 
 	// fetch the next item (blocking) from the Queue to process or
-	// if a shutdown is requested then return out of this to stop
-	// processing
+	// if a shutdown is requested then return out to stop
 	key, quit := c.Queue.Get()
 	if quit {
 		return false
 	}
 	// Key format is as follows :  CREATE/namespace/name, DELETE/namespace/name, UPDATE/namespace/name
-	// also keep track if this is an Add
+	// also keep track if this is an create
 	create := true
 	formattedKey := strings.Split(key.(string), "/")
 	if formattedKey[0] != "ADD" {
@@ -207,8 +215,6 @@ func (c *Controller) processNextItem() bool {
 	}
 	keyRaw := strings.Join(formattedKey[1:], "/")
 
-	// take the string key and get the object out of the indexer
-	//
 	// item will contain the complex object for the resource and
 	// exists is a bool that'll indicate whether or not the
 	// resource was created (true) or deleted (false)
@@ -233,8 +239,8 @@ func (c *Controller) processNextItem() bool {
 	// was created or updated so run the ObjectCreated/ObjectUpdated method
 	// dequeue the key to indicate success, requeue it on failure
 	if exists {
-		// This is a Pod Create
 		if create == true {
+			// This is a Pod Create
 			c.Log.Info("controller.processNextItem: object create detected: %s", keyRaw)
 			err = c.Handle.ObjectCreated(item)
 			if err == nil {
