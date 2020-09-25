@@ -81,9 +81,9 @@ func (c *Command) init() {
 	c.flags.StringVar(&c.flagServerCAKeyFile, "server-ca-key-file", "",
 		"Location of a file containing the servers' CA signing key.")
 	c.flags.StringVar(&c.flagResourcePrefix, "resource-prefix", "",
-		"Prefix to use for Kubernetes resources. The created secret will be named '<resource-prefix>-federation'.")
+		"Prefix to use for SourceValue resources. The created secret will be named '<resource-prefix>-federation'.")
 	c.flags.StringVar(&c.flagK8sNamespace, "k8s-namespace", "",
-		"Name of Kubernetes namespace where Consul is deployed.")
+		"Name of SourceValue namespace where Consul is deployed.")
 	c.flags.StringVar(&c.flagMeshGatewayServiceName, "mesh-gateway-service-name", "",
 		"Name of the mesh gateway service registered into Consul.")
 	c.flags.StringVar(&c.flagLogLevel, "log-level", "info",
@@ -97,7 +97,7 @@ func (c *Command) init() {
 	c.help = flags.Usage(help, c.flags)
 }
 
-// Run creates a Kubernetes secret with data needed by secondary datacenters
+// Run creates a SourceValue secret with data needed by secondary datacenters
 // in order to federate with the primary. It's assumed this is running in the
 // primary datacenter.
 func (c *Command) Run(args []string) int {
@@ -166,16 +166,16 @@ func (c *Command) Run(args []string) int {
 	federationSecret.Data[fedSecretCAKeyKey] = caKey
 	logger.Info("Server CA key retrieved successfully")
 
-	// Create the Kubernetes clientset.
+	// Create the SourceValue clientset.
 	if c.k8sClient == nil {
 		k8sCfg, err := subcommand.K8SConfig(c.k8s.KubeConfig())
 		if err != nil {
-			c.UI.Error(fmt.Sprintf("Error retrieving Kubernetes auth: %s", err))
+			c.UI.Error(fmt.Sprintf("Error retrieving SourceValue auth: %s", err))
 			return 1
 		}
 		c.k8sClient, err = kubernetes.NewForConfig(k8sCfg)
 		if err != nil {
-			c.UI.Error(fmt.Sprintf("Error initializing Kubernetes client: %s", err))
+			c.UI.Error(fmt.Sprintf("Error initializing SourceValue client: %s", err))
 			return 1
 		}
 	}
@@ -239,8 +239,8 @@ func (c *Command) Run(args []string) int {
 	}
 	federationSecret.Data[fedSecretServerConfigKey] = serverCfg
 
-	// Now create the Kubernetes secret.
-	logger.Info("Creating/updating Kubernetes secret", "name", federationSecret.ObjectMeta.Name, "ns", c.flagK8sNamespace)
+	// Now create the SourceValue secret.
+	logger.Info("Creating/updating SourceValue secret", "name", federationSecret.ObjectMeta.Name, "ns", c.flagK8sNamespace)
 	_, err = c.k8sClient.CoreV1().Secrets(c.flagK8sNamespace).Create(context.TODO(), federationSecret, metav1.CreateOptions{})
 	if k8serrors.IsAlreadyExists(err) {
 		logger.Info("Secret already exists, updating instead")
@@ -283,7 +283,7 @@ func (c *Command) validateFlags(args []string) error {
 	return nil
 }
 
-// replicationToken waits for the ACL replication token Kubernetes secret to
+// replicationToken waits for the ACL replication token SourceValue secret to
 // be created and then returns it.
 func (c *Command) replicationToken(logger hclog.Logger) ([]byte, error) {
 	secretName := fmt.Sprintf("%s-%s-acl-token", c.flagResourcePrefix, common.ACLReplicationTokenName)
@@ -435,11 +435,11 @@ func (c *Command) Help() string {
 	return c.help
 }
 
-const synopsis = "Create a Kubernetes secret containing data needed for federation"
+const synopsis = "Create a SourceValue secret containing data needed for federation"
 const help = `
 Usage: consul-k8s create-federation-secret [options]
 
-  Creates a Kubernetes secret that contains all the data required for a secondary
+  Creates a SourceValue secret that contains all the data required for a secondary
   datacenter to federate with the primary. This command should only be run in the
   primary datacenter.
 

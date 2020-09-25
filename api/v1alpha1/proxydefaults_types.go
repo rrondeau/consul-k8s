@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/consul/api"
+	"github.com/hashicorp/consul-k8s/api/common"
 	capi "github.com/hashicorp/consul/api"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -30,8 +30,6 @@ type ProxyDefaults struct {
 	Status            `json:"status,omitempty"`
 }
 
-// RawMessage for Config based on recommendation here: https://github.com/kubernetes-sigs/controller-tools/issues/294#issuecomment-518380816
-
 // ProxyDefaultsSpec defines the desired state of ProxyDefaults
 type ProxyDefaultsSpec struct {
 	// Config is an arbitrary map of configuration values used by Connect proxies.
@@ -43,6 +41,8 @@ type ProxyDefaultsSpec struct {
 	// Expose controls the default expose path configuration for Envoy.
 	Expose ExposeConfig `json:"expose,omitempty"`
 }
+
+// RawMessage for Config based on recommendation here: https://github.com/kubernetes-sigs/controller-tools/issues/294#issuecomment-518380816
 
 func (in *ProxyDefaults) GetObjectMeta() metav1.ObjectMeta {
 	return in.ObjectMeta
@@ -111,18 +111,22 @@ func (in *ProxyDefaults) SetSyncedCondition(status corev1.ConditionStatus, reaso
 	}
 }
 
-func (in *ProxyDefaults) ToConsul() api.ConfigEntry {
+func (in *ProxyDefaults) ToConsul(dc string) capi.ConfigEntry {
 	consulConfig := in.convertConfig()
 	return &capi.ProxyConfigEntry{
-		Kind:        in.ConsulKind(),
-		Name:        in.Name(),
+		Kind: in.ConsulKind(),
+		Name: in.Name(),
+		Meta: map[string]string{
+			common.SourceKey:     common.SourceValue,
+			common.DatacenterKey: dc,
+		},
 		MeshGateway: in.Spec.MeshGateway.toConsul(),
 		Expose:      in.Spec.Expose.toConsul(),
 		Config:      consulConfig,
 	}
 }
 
-func (in *ProxyDefaults) MatchesConsul(candidate api.ConfigEntry) bool {
+func (in *ProxyDefaults) MatchesConsul(candidate capi.ConfigEntry, datacenter string) bool {
 	proxyDefCand, ok := candidate.(*capi.ProxyConfigEntry)
 	if !ok {
 		return false
@@ -131,7 +135,15 @@ func (in *ProxyDefaults) MatchesConsul(candidate api.ConfigEntry) bool {
 	proxyDefCand.CreateIndex = 0
 	proxyDefCand.ModifyIndex = 0
 
-	return reflect.DeepEqual(in.ToConsul(), proxyDefCand)
+	return reflect.DeepEqual(in.ToConsul(datacenter), proxyDefCand)
+}
+
+func (in *ProxyDefaults) MatchesDatacenter(candidate capi.ConfigEntry, datacenter string) bool {
+	proxyDefCand, ok := candidate.(*capi.ProxyConfigEntry)
+	if !ok {
+		return false
+	}
+	return proxyDefCand.Meta[common.DatacenterKey] == datacenter
 }
 
 func (in *ProxyDefaults) Validate() error {

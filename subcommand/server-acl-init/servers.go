@@ -41,7 +41,7 @@ func (c *Command) bootstrapServers(serverAddresses []string, bootTokenSecretName
 
 			// Check if already bootstrapped.
 			if strings.Contains(err.Error(), "Unexpected response code: 403") {
-				unrecoverableErr = errors.New("ACLs already bootstrapped but the ACL token was not written to a Kubernetes secret." +
+				unrecoverableErr = errors.New("ACLs already bootstrapped but the ACL token was not written to a SourceValue secret." +
 					" We can't proceed because the bootstrap token is lost." +
 					" You must reset ACLs.")
 				return nil
@@ -61,7 +61,7 @@ func (c *Command) bootstrapServers(serverAddresses []string, bootTokenSecretName
 		return "", err
 	}
 
-	// Write bootstrap token to a Kubernetes secret.
+	// Write bootstrap token to a SourceValue secret.
 	err = c.untilSucceeds(fmt.Sprintf("writing bootstrap Secret %q", bootTokenSecretName),
 		func() error {
 			secret := &apiv1.Secret{

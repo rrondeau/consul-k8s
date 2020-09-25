@@ -723,7 +723,7 @@ func TestRun_ReplicationSecretDelay(t *testing.T) {
 	require.NoError(t, err)
 
 	// Bootstrap ACLs. We can do this before the command is started because
-	// the command retrieves the replication token from Kubernetes secret, i.e.
+	// the command retrieves the replication token from SourceValue secret, i.e.
 	// that's the only thing that needs to be delayed.
 	var bootstrapResp *api.ACLToken
 	timer := &retry.Timer{Timeout: 10 * time.Second, Wait: 500 * time.Millisecond}

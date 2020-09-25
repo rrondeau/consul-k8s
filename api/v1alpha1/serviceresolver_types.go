@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/hashicorp/consul-k8s/api/common"
 	capi "github.com/hashicorp/consul/api"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -87,10 +88,14 @@ func (in *ServiceResolver) SyncedConditionStatus() corev1.ConditionStatus {
 }
 
 // ToConsul converts the entry into its Consul equivalent struct.
-func (in *ServiceResolver) ToConsul() capi.ConfigEntry {
+func (in *ServiceResolver) ToConsul(dc string) capi.ConfigEntry {
 	return &capi.ServiceResolverConfigEntry{
-		Kind:           in.ConsulKind(),
-		Name:           in.Name(),
+		Kind: in.ConsulKind(),
+		Name: in.Name(),
+		Meta: map[string]string{
+			common.SourceKey:     common.SourceValue,
+			common.DatacenterKey: dc,
+		},
 		DefaultSubset:  in.Spec.DefaultSubset,
 		Subsets:        in.Spec.Subsets.toConsul(),
 		Redirect:       in.Spec.Redirect.toConsul(),
@@ -99,7 +104,7 @@ func (in *ServiceResolver) ToConsul() capi.ConfigEntry {
 	}
 }
 
-func (in *ServiceResolver) MatchesConsul(candidate capi.ConfigEntry) bool {
+func (in *ServiceResolver) MatchesConsul(candidate capi.ConfigEntry, datacenter string) bool {
 	serviceResolverCandidate, ok := candidate.(*capi.ServiceResolverConfigEntry)
 	if !ok {
 		return false
@@ -110,7 +115,16 @@ func (in *ServiceResolver) MatchesConsul(candidate capi.ConfigEntry) bool {
 		in.Spec.Subsets.matchesConsul(serviceResolverCandidate.Subsets) &&
 		in.Spec.Redirect.matchesConsul(serviceResolverCandidate.Redirect) &&
 		in.Spec.Failover.matchesConsul(serviceResolverCandidate.Failover) &&
-		in.Spec.ConnectTimeout == serviceResolverCandidate.ConnectTimeout
+		in.Spec.ConnectTimeout == serviceResolverCandidate.ConnectTimeout &&
+		datacenter == serviceResolverCandidate.Meta[common.DatacenterKey]
+}
+
+func (in *ServiceResolver) MatchesDatacenter(candidate capi.ConfigEntry, datacenter string) bool {
+	proxyDefCand, ok := candidate.(*capi.ServiceResolverConfigEntry)
+	if !ok {
+		return false
+	}
+	return proxyDefCand.Meta[common.DatacenterKey] == datacenter
 }
 
 func (in *ServiceResolver) Validate() error {

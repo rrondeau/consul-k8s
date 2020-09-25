@@ -40,14 +40,15 @@ type ConfigEntryResource interface {
 	// ToConsul converts the resource to the corresponding Consul API definition.
 	// Its return type is the generic ConfigEntry but a specific config entry
 	// type should be constructed e.g. ServiceConfigEntry.
-	ToConsul() api.ConfigEntry
+	ToConsul(datacenter string) api.ConfigEntry
 	// MatchesConsul returns true if the resource has the same fields as the Consul
 	// config entry.
-	MatchesConsul(candidate api.ConfigEntry) bool
+	MatchesConsul(candidate api.ConfigEntry, datacenter string) bool
 	// GetObjectKind should be implemented by the generated code.
 	GetObjectKind() schema.ObjectKind
 	// DeepCopyObject should be implemented by the generated code.
 	DeepCopyObject() runtime.Object
 	// Validate returns an error if the resource is invalid.
 	Validate() error
+	MatchesDatacenter(candidate api.ConfigEntry, datacenter string) bool
 }

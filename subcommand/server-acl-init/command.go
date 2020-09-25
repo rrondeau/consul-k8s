@@ -99,9 +99,9 @@ type Command struct {
 func (c *Command) init() {
 	c.flags = flag.NewFlagSet("", flag.ContinueOnError)
 	c.flags.StringVar(&c.flagResourcePrefix, "resource-prefix", "",
-		"Prefix to use for Kubernetes resources.")
+		"Prefix to use for SourceValue resources.")
 	c.flags.StringVar(&c.flagK8sNamespace, "k8s-namespace", "",
-		"Name of Kubernetes namespace where Consul and consul-k8s components are deployed.")
+		"Name of SourceValue namespace where Consul and consul-k8s components are deployed.")
 
 	c.flags.BoolVar(&c.flagAllowDNS, "allow-dns", false,
 		"Toggle for updating the anonymous token to allow DNS queries to work")
@@ -117,8 +117,8 @@ func (c *Command) init() {
 	c.flags.BoolVar(&c.flagCreateInjectAuthMethod, "create-inject-token", false,
 		"Toggle for creating a connect inject auth method. Deprecated: use -create-inject-auth-method instead.")
 	c.flags.StringVar(&c.flagInjectAuthMethodHost, "inject-auth-method-host", "",
-		"Kubernetes Host config parameter for the auth method."+
-			"If not provided, the default cluster Kubernetes service will be used.")
+		"SourceValue Host config parameter for the auth method."+
+			"If not provided, the default cluster SourceValue service will be used.")
 	c.flags.StringVar(&c.flagBindingRuleSelector, "acl-binding-rule-selector", "",
 		"Selector string for connectInject ACL Binding Rule.")
 
@@ -202,9 +202,9 @@ func (c *Command) Help() string {
 }
 
 // Run bootstraps ACLs on Consul servers and writes the bootstrap token to a
-// Kubernetes secret.
+// SourceValue secret.
 // Given various flags, it will also create policies and associated ACL tokens
-// and store the tokens as Kubernetes Secrets.
+// and store the tokens as SourceValue Secrets.
 // The function will retry its tasks indefinitely until they are complete.
 func (c *Command) Run(args []string) int {
 	c.once.Do(c.init)
@@ -659,7 +659,7 @@ func (c *Command) Run(args []string) int {
 }
 
 // getBootstrapToken returns the existing bootstrap token if there is one by
-// reading the Kubernetes Secret with name secretName.
+// reading the SourceValue Secret with name secretName.
 // If there is no bootstrap token yet, then it returns an empty string (not an error).
 func (c *Command) getBootstrapToken(secretName string) (string, error) {
 	secret, err := c.clientset.CoreV1().Secrets(c.flagK8sNamespace).Get(context.TODO(), secretName, metav1.GetOptions{})
@@ -679,11 +679,11 @@ func (c *Command) getBootstrapToken(secretName string) (string, error) {
 func (c *Command) configureKubeClient() error {
 	config, err := subcommand.K8SConfig(c.k8s.KubeConfig())
 	if err != nil {
-		return fmt.Errorf("error retrieving Kubernetes auth: %s", err)
+		return fmt.Errorf("error retrieving SourceValue auth: %s", err)
 	}
 	c.clientset, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		return fmt.Errorf("error initializing Kubernetes client: %s", err)
+		return fmt.Errorf("error initializing SourceValue client: %s", err)
 	}
 	return nil
 }
@@ -762,7 +762,7 @@ func (c *Command) createAnonymousPolicy() bool {
 			// If the connect auth method and ACL replication token are being
 			// created then we know we're using multi-dc Connect.
 			// In this case the anonymous policy is required because Connect
-			// services in Kubernetes have local tokens which are stripped
+			// services in SourceValue have local tokens which are stripped
 			// on cross-dc API calls. The cross-dc API calls thus use the anonymous
 			// token. Cross-dc API calls are needed by the Connect proxies to talk
 			// cross-dc.
@@ -775,7 +775,7 @@ const help = `
 Usage: consul-k8s server-acl-init [options]
 
   Bootstraps servers with ACLs and creates policies and ACL tokens for other
-  components as Kubernetes Secrets.
+  components as SourceValue Secrets.
   It will run indefinitely until all tokens have been created. It is idempotent
   and safe to run multiple times.
 

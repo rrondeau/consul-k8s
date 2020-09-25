@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"testing"
 
+	"github.com/hashicorp/consul-k8s/api/common"
 	capi "github.com/hashicorp/consul/api"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -18,6 +19,10 @@ func TestToConsul(t *testing.T) {
 			&ServiceDefaults{},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 			},
 		},
 		"name:resource-name": {
@@ -29,6 +34,10 @@ func TestToConsul(t *testing.T) {
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
 				Name: "resource-name",
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 			},
 		},
 		"protocol:http": {
@@ -38,7 +47,11 @@ func TestToConsul(t *testing.T) {
 				},
 			},
 			&capi.ServiceConfigEntry{
-				Kind:     capi.ServiceDefaults,
+				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Protocol: "http",
 			},
 		},
@@ -49,7 +62,11 @@ func TestToConsul(t *testing.T) {
 				},
 			},
 			&capi.ServiceConfigEntry{
-				Kind:     capi.ServiceDefaults,
+				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Protocol: "https",
 			},
 		},
@@ -60,7 +77,11 @@ func TestToConsul(t *testing.T) {
 				},
 			},
 			&capi.ServiceConfigEntry{
-				Kind:     capi.ServiceDefaults,
+				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Protocol: "",
 			},
 		},
@@ -74,6 +95,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeDefault,
 				},
@@ -89,6 +114,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeLocal,
 				},
@@ -104,6 +133,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeRemote,
 				},
@@ -119,6 +152,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeNone,
 				},
@@ -134,6 +171,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeDefault,
 				},
@@ -149,6 +190,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeDefault,
 				},
@@ -161,7 +206,11 @@ func TestToConsul(t *testing.T) {
 				},
 			},
 			&capi.ServiceConfigEntry{
-				Kind:        capi.ServiceDefaults,
+				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				ExternalSNI: "test-external-sni",
 			},
 		},
@@ -172,7 +221,11 @@ func TestToConsul(t *testing.T) {
 				},
 			},
 			&capi.ServiceConfigEntry{
-				Kind:        capi.ServiceDefaults,
+				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				ExternalSNI: "",
 			},
 		},
@@ -186,6 +239,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Expose: capi.ExposeConfig{
 					Checks: false,
 				},
@@ -201,6 +258,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Expose: capi.ExposeConfig{
 					Checks: true,
 				},
@@ -223,6 +284,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Expose: capi.ExposeConfig{
 					Paths: []capi.ExposePath{
 						{
@@ -258,6 +323,10 @@ func TestToConsul(t *testing.T) {
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Expose: capi.ExposeConfig{
 					Paths: []capi.ExposePath{
 						{
@@ -280,7 +349,7 @@ func TestToConsul(t *testing.T) {
 
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
-			output := testCase.input.ToConsul()
+			output := testCase.input.ToConsul("test-dc")
 			require.Equal(t, testCase.expected, output)
 		})
 	}
@@ -290,368 +359,150 @@ func TestMatchesConsul(t *testing.T) {
 	cases := map[string]struct {
 		internal *ServiceDefaults
 		consul   *capi.ServiceConfigEntry
-		matches  bool
 	}{
-		"name:matches": {
+		"no fields set": {
 			&ServiceDefaults{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "my-test-service",
+					Name: "defaults",
 				},
 				Spec: ServiceDefaultsSpec{},
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
-				Name: "my-test-service",
+				Name: "defaults",
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 			},
-			true,
 		},
-		"name:mismatched": {
+		"all fields set": {
 			&ServiceDefaults{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "my-test-service",
+					Name: "defaults",
 				},
-				Spec: ServiceDefaultsSpec{},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Name: "differently-named-service",
-			},
-			false,
-		},
-		"protocol:matches": {
-			&ServiceDefaults{
 				Spec: ServiceDefaultsSpec{
-					Protocol: "http",
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind:     capi.ServiceDefaults,
-				Protocol: "http",
-			},
-			true,
-		},
-		"protocol:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Protocol: "http",
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind:     capi.ServiceDefaults,
-				Protocol: "https",
-			},
-			false,
-		},
-		"gatewayConfig:matches": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
+					Protocol: "tcp",
 					MeshGateway: MeshGatewayConfig{
 						Mode: "remote",
 					},
+					Expose: ExposeConfig{
+						Checks: true,
+						Paths: []ExposePath{
+							{
+								ListenerPort:  80,
+								Path:          "/default",
+								LocalPathPort: 9091,
+								Protocol:      "http2",
+							},
+							{
+								ListenerPort:  8080,
+								Path:          "/remote",
+								LocalPathPort: 9000,
+								Protocol:      "tcp",
+							},
+						},
+					},
+					ExternalSNI: "valid-external-sni",
 				},
 			},
 			&capi.ServiceConfigEntry{
 				Kind: capi.ServiceDefaults,
+				Name: "defaults",
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
+				Protocol: "tcp",
 				MeshGateway: capi.MeshGatewayConfig{
 					Mode: capi.MeshGatewayModeRemote,
 				},
-			},
-			true,
-		},
-		"gatewayConfig:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					MeshGateway: MeshGatewayConfig{
-						Mode: "remote",
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				MeshGateway: capi.MeshGatewayConfig{
-					Mode: capi.MeshGatewayModeLocal,
-				},
-			},
-			false,
-		},
-		"externalSNI:matches": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					ExternalSNI: "test-external-sni",
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind:        capi.ServiceDefaults,
-				ExternalSNI: "test-external-sni",
-			},
-			true,
-		},
-		"externalSNI:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					ExternalSNI: "test-external-sni",
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind:        capi.ServiceDefaults,
-				ExternalSNI: "different-external-sni",
-			},
-			false,
-		},
-		"expose.checks:matches": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Checks: true,
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
 				Expose: capi.ExposeConfig{
 					Checks: true,
-				},
-			},
-			true,
-		},
-		"expose.checks:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Checks: true,
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Checks: false,
-				},
-			},
-			false,
-		},
-		"expose.paths:matches": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								ListenerPort:  80,
-								Path:          "/test/path",
-								LocalPathPort: 42,
-								Protocol:      "tcp",
-							},
-							{
-								ListenerPort:  8080,
-								Path:          "/second/test/path",
-								LocalPathPort: 11,
-								Protocol:      "https",
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
 					Paths: []capi.ExposePath{
 						{
 							ListenerPort:  80,
-							Path:          "/test/path",
-							LocalPathPort: 42,
+							Path:          "/default",
+							LocalPathPort: 9091,
+							Protocol:      "http2",
+						},
+						{
+							ListenerPort:  8080,
+							Path:          "/remote",
+							LocalPathPort: 9000,
 							Protocol:      "tcp",
 						},
-						{
-							ListenerPort:  8080,
-							Path:          "/second/test/path",
-							LocalPathPort: 11,
-							Protocol:      "https",
-						},
 					},
 				},
+				ExternalSNI: "valid-external-sni",
 			},
-			true,
-		},
-		"expose.paths.listenerPort:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								ListenerPort: 80,
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Paths: []capi.ExposePath{
-						{
-							ListenerPort: 81,
-						},
-					},
-				},
-			},
-			false,
-		},
-		"expose.paths.path:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								Path: "/test/path",
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Paths: []capi.ExposePath{
-						{
-							Path: "/differnt/path",
-						},
-					},
-				},
-			},
-			false,
-		},
-		"expose.paths.localPathPort:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								LocalPathPort: 42,
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Paths: []capi.ExposePath{
-						{
-							LocalPathPort: 21,
-						},
-					},
-				},
-			},
-			false,
-		},
-		"expose.paths.protocol:mismatched": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								Protocol: "tcp",
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Paths: []capi.ExposePath{
-						{
-							Protocol: "https",
-						},
-					},
-				},
-			},
-			false,
-		},
-		"expose.paths:mismatched when path lengths are different": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								ListenerPort:  8080,
-								Path:          "/second/test/path",
-								LocalPathPort: 11,
-								Protocol:      "https",
-							},
-							{
-								ListenerPort:  80,
-								Path:          "/test/path",
-								LocalPathPort: 42,
-								Protocol:      "tcp",
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Paths: []capi.ExposePath{
-						{
-							ListenerPort:  8080,
-							Path:          "/second/test/path",
-							LocalPathPort: 11,
-							Protocol:      "https",
-						},
-					},
-				},
-			},
-			false,
-		},
-		"expose.paths:match when paths orders are different": {
-			&ServiceDefaults{
-				Spec: ServiceDefaultsSpec{
-					Expose: ExposeConfig{
-						Paths: []ExposePath{
-							{
-								ListenerPort:  8080,
-								Path:          "/second/test/path",
-								LocalPathPort: 11,
-								Protocol:      "https",
-							},
-							{
-								ListenerPort:  80,
-								Path:          "/test/path",
-								LocalPathPort: 42,
-								Protocol:      "tcp",
-							},
-						},
-					},
-				},
-			},
-			&capi.ServiceConfigEntry{
-				Kind: capi.ServiceDefaults,
-				Expose: capi.ExposeConfig{
-					Paths: []capi.ExposePath{
-						{
-							ListenerPort:  80,
-							Path:          "/test/path",
-							LocalPathPort: 42,
-							Protocol:      "tcp",
-						},
-						{
-							ListenerPort:  8080,
-							Path:          "/second/test/path",
-							LocalPathPort: 11,
-							Protocol:      "https",
-						},
-					},
-				},
-			},
-			true,
 		},
 	}
 
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
-			result := testCase.internal.MatchesConsul(testCase.consul)
-			require.Equal(t, testCase.matches, result)
+			result := testCase.internal.MatchesConsul(testCase.consul, "")
+			require.True(t, result)
+		})
+	}
+}
+
+func TestServiceDefaults_MatchesDatacenter(t *testing.T) {
+	cases := map[string]struct {
+		ConfigEntry    *capi.ServiceConfigEntry
+		DatacenterName string
+		Matches        bool
+	}{
+		"Datacenter empty": {
+			ConfigEntry: &capi.ServiceConfigEntry{
+				Kind: capi.ServiceDefaults,
+				Name: "svc-default",
+				Meta: map[string]string{
+					common.DatacenterKey: "this-datacenter",
+				},
+			},
+			DatacenterName: "",
+			Matches:        false,
+		},
+		"Metadata empty": {
+			ConfigEntry: &capi.ServiceConfigEntry{
+				Kind: capi.ServiceDefaults,
+				Name: "svc-default",
+				Meta: map[string]string{
+					common.DatacenterKey: "",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        false,
+		},
+		"Different values": {
+			ConfigEntry: &capi.ServiceConfigEntry{
+				Kind: capi.ServiceDefaults,
+				Name: "svc-default",
+				Meta: map[string]string{
+					common.DatacenterKey: "other-datacenter",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        false,
+		},
+		"Matches": {
+			ConfigEntry: &capi.ServiceConfigEntry{
+				Kind: capi.ServiceDefaults,
+				Name: "svc-default",
+				Meta: map[string]string{
+					common.DatacenterKey: "this-datacenter",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        true,
+		},
+	}
+
+	for name, test := range cases {
+		serviceDefault := &ServiceDefaults{}
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, serviceDefault.MatchesDatacenter(test.ConfigEntry, test.DatacenterName), test.Matches)
 		})
 	}
 }

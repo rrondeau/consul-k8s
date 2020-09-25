@@ -8,4 +8,7 @@ const (
 
 	Global                 string = "global"
 	DefaultConsulNamespace string = "default"
+	SourceKey              string = "external-source"
+	DatacenterKey          string = "consul.hashicorp.com/source-datacenter"
+	SourceValue            string = "kubernetes"
 )

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -18,8 +19,9 @@ import (
 )
 
 const (
-	FinalizerName    = "finalizers.consul.hashicorp.com"
-	ConsulAgentError = "ConsulAgentError"
+	FinalizerName             = "finalizers.consul.hashicorp.com"
+	ConsulAgentError          = "ConsulAgentError"
+	DuplicateConfigEntryError = "DuplicateConfigEntryError"
 )
 
 // Controller is implemented by CRD-specific controllers. It is used by
@@ -29,7 +31,7 @@ type Controller interface {
 	Update(context.Context, runtime.Object, ...client.UpdateOption) error
 	// UpdateStatus updates the state of just the object's status.
 	UpdateStatus(context.Context, runtime.Object, ...client.UpdateOption) error
-	// Get retrieves an obj for the given object key from the Kubernetes Cluster.
+	// Get retrieves an obj for the given object key from the SourceValue Cluster.
 	// obj must be a struct pointer so that obj can be updated with the response
 	// returned by the Server.
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
@@ -67,6 +69,10 @@ type ConfigEntryController struct {
 	// any created Consul namespaces to allow cross namespace service discovery.
 	// Only necessary if ACLs are enabled.
 	CrossNSACLPolicy string
+
+	// DatacenterName is the name of the Source datacenter. This is utilized to
+	// determine if a config entry is unique across federated clusters.
+	DatacenterName string
 }
 
 // ReconcileEntry reconciles an update to a resource. CRD-specific controller's
@@ -145,7 +151,7 @@ func (r *ConfigEntryController) ReconcileEntry(
 		}
 
 		// Create the config entry
-		_, _, err := r.ConsulClient.ConfigEntries().Set(configEntry.ToConsul(), &capi.WriteOptions{
+		_, _, err := r.ConsulClient.ConfigEntries().Set(configEntry.ToConsul(r.DatacenterName), &capi.WriteOptions{
 			Namespace: r.consulNamespace(req.Namespace, configEntry.ConsulNamespaced()),
 		})
 		if err != nil {
@@ -161,8 +167,17 @@ func (r *ConfigEntryController) ReconcileEntry(
 		return r.syncFailed(ctx, logger, crdCtrl, configEntry, ConsulAgentError, err)
 	}
 
-	if !configEntry.MatchesConsul(entry) {
-		_, _, err := r.ConsulClient.ConfigEntries().Set(configEntry.ToConsul(), &capi.WriteOptions{
+	if !configEntry.MatchesConsul(entry, "") {
+		// The MatchesDatacenter check is temporary. Eventually the ConfigEntry interface will
+		// expose a Meta() method directly which can be used in place of the method below for
+		// comparing if the config entry was created within this datacenter.
+		// This check ensure we only manage config entries created by our controller and does not
+		// create duplicate config entries across federated clusters are they are unique across
+		// the federation.
+		if !configEntry.MatchesDatacenter(entry, r.DatacenterName) {
+			return r.syncFailed(ctx, logger, crdCtrl, configEntry, DuplicateConfigEntryError, errors.New("config entry defined within Consul Federation"))
+		}
+		_, _, err := r.ConsulClient.ConfigEntries().Set(configEntry.ToConsul(r.DatacenterName), &capi.WriteOptions{
 			Namespace: r.consulNamespace(req.Namespace, configEntry.ConsulNamespaced()),
 		})
 		if err != nil {

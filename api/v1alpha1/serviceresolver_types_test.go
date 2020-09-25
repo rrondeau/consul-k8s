@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/consul-k8s/api/common"
 	capi "github.com/hashicorp/consul/api"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -26,6 +27,10 @@ func TestServiceResolver_MatchesConsulTrue(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 			},
 		},
 		"all fields set": {
@@ -69,8 +74,12 @@ func TestServiceResolver_MatchesConsulTrue(t *testing.T) {
 				},
 			},
 			Theirs: &capi.ServiceResolverConfigEntry{
-				Name:          "name",
-				Kind:          capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				DefaultSubset: "default_subset",
 				Subsets: map[string]capi.ServiceResolverSubset{
 					"subset1": {
@@ -108,7 +117,7 @@ func TestServiceResolver_MatchesConsulTrue(t *testing.T) {
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			require.True(t, c.Ours.MatchesConsul(c.Theirs))
+			require.True(t, c.Ours.MatchesConsul(c.Theirs, ""))
 		})
 	}
 }
@@ -129,6 +138,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 			},
 		},
 		"different name": {
@@ -141,6 +154,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "other_name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 			},
 		},
 		"different default subset": {
@@ -153,8 +170,12 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 				},
 			},
 			Theirs: &capi.ServiceResolverConfigEntry{
-				Name:          "name",
-				Kind:          capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				DefaultSubset: "different",
 			},
 		},
@@ -171,6 +192,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Subsets: map[string]capi.ServiceResolverSubset{
 					"sub": {},
 				},
@@ -188,8 +213,12 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 				},
 			},
 			Theirs: &capi.ServiceResolverConfigEntry{
-				Name:    "name",
-				Kind:    capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Subsets: nil,
 			},
 		},
@@ -209,6 +238,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Subsets: map[string]capi.ServiceResolverSubset{
 					"sub": {
 						Filter: "different_filter",
@@ -228,6 +261,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Redirect: &capi.ServiceResolverRedirect{
 					Service: "service",
 				},
@@ -245,8 +282,12 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 				},
 			},
 			Theirs: &capi.ServiceResolverConfigEntry{
-				Name:     "name",
-				Kind:     capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Redirect: nil,
 			},
 		},
@@ -264,6 +305,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Redirect: &capi.ServiceResolverRedirect{
 					Service: "different_service",
 				},
@@ -281,6 +326,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Failover: map[string]capi.ServiceResolverFailover{
 					"failover": {},
 				},
@@ -298,8 +347,12 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 				},
 			},
 			Theirs: &capi.ServiceResolverConfigEntry{
-				Name:     "name",
-				Kind:     capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Failover: nil,
 			},
 		},
@@ -319,6 +372,10 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 			Theirs: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Failover: map[string]capi.ServiceResolverFailover{
 					"failover": {
 						Service: "different_service",
@@ -336,15 +393,19 @@ func TestServiceResolver_MatchesConsulFalse(t *testing.T) {
 				},
 			},
 			Theirs: &capi.ServiceResolverConfigEntry{
-				Name:           "name",
-				Kind:           capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				ConnectTimeout: 2 * time.Second,
 			},
 		},
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			require.False(t, c.Ours.MatchesConsul(c.Theirs))
+			require.False(t, c.Ours.MatchesConsul(c.Theirs, ""))
 		})
 	}
 }
@@ -364,6 +425,10 @@ func TestServiceResolver_ToConsul(t *testing.T) {
 			Exp: &capi.ServiceResolverConfigEntry{
 				Name: "name",
 				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 			},
 		},
 		"every field set": {
@@ -407,8 +472,12 @@ func TestServiceResolver_ToConsul(t *testing.T) {
 				},
 			},
 			Exp: &capi.ServiceResolverConfigEntry{
-				Name:          "name",
-				Kind:          capi.ServiceResolver,
+				Name: "name",
+				Kind: capi.ServiceResolver,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				DefaultSubset: "default_subset",
 				Subsets: map[string]capi.ServiceResolverSubset{
 					"subset1": {
@@ -446,10 +515,70 @@ func TestServiceResolver_ToConsul(t *testing.T) {
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			act := c.Ours.ToConsul()
+			act := c.Ours.ToConsul("test-dc")
 			serviceResolver, ok := act.(*capi.ServiceResolverConfigEntry)
 			require.True(t, ok, "could not cast")
 			require.Equal(t, c.Exp, serviceResolver)
+		})
+	}
+}
+
+func TestServiceResolver_MatchesDatacenter(t *testing.T) {
+	cases := map[string]struct {
+		ConfigEntry    *capi.ServiceResolverConfigEntry
+		DatacenterName string
+		Matches        bool
+	}{
+		"Datacenter empty": {
+			ConfigEntry: &capi.ServiceResolverConfigEntry{
+				Kind: capi.ServiceResolver,
+				Name: "svc-resolver",
+				Meta: map[string]string{
+					common.DatacenterKey: "this-datacenter",
+				},
+			},
+			DatacenterName: "",
+			Matches:        false,
+		},
+		"Metadata empty": {
+			ConfigEntry: &capi.ServiceResolverConfigEntry{
+				Kind: capi.ServiceResolver,
+				Name: "svc-resolver",
+				Meta: map[string]string{
+					common.DatacenterKey: "",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        false,
+		},
+		"Different values": {
+			ConfigEntry: &capi.ServiceResolverConfigEntry{
+				Kind: capi.ServiceResolver,
+				Name: "svc-resolver",
+				Meta: map[string]string{
+					common.DatacenterKey: "other-datacenter",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        false,
+		},
+		"Matches": {
+			ConfigEntry: &capi.ServiceResolverConfigEntry{
+				Kind: capi.ServiceResolver,
+				Name: "svc-resolver",
+				Meta: map[string]string{
+					common.DatacenterKey: "this-datacenter",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        true,
+		},
+	}
+
+	for name, test := range cases {
+		serviceResolver := &ServiceResolver{}
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, serviceResolver.MatchesDatacenter(test.ConfigEntry, test.DatacenterName), test.Matches)
 		})
 	}
 }

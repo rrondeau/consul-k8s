@@ -28,7 +28,7 @@ func (c *Command) createGlobalACL(name, rules, dc string, consulClient *api.Clie
 // createACL creates a policy with rules and name. If localToken is true then
 // the token will be a local token and the policy will be scoped to only dc.
 // If localToken is false, the policy will be global.
-// The token will be written to a Kubernetes secret.
+// The token will be written to a SourceValue secret.
 func (c *Command) createACL(name, rules string, localToken bool, dc string, consulClient *api.Client) error {
 	// Create policy with the given rules.
 	policyName := fmt.Sprintf("%s-token", name)
@@ -83,7 +83,7 @@ func (c *Command) createACL(name, rules string, localToken bool, dc string, cons
 		return err
 	}
 
-	// Write token to a Kubernetes secret.
+	// Write token to a SourceValue secret.
 	return c.untilSucceeds(fmt.Sprintf("writing Secret for token %s", policyTmpl.Name),
 		func() error {
 			secret := &apiv1.Secret{

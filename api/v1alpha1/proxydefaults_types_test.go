@@ -28,6 +28,10 @@ func TestProxyDefaults_MatchesConsul(t *testing.T) {
 			Theirs: &capi.ProxyConfigEntry{
 				Name: common.Global,
 				Kind: capi.ProxyDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 			},
 		},
 		"all fields set": {
@@ -62,6 +66,10 @@ func TestProxyDefaults_MatchesConsul(t *testing.T) {
 			Theirs: &capi.ProxyConfigEntry{
 				Kind: capi.ProxyDefaults,
 				Name: common.Global,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "",
+				},
 				Config: map[string]interface{}{
 					"envoy_tracing_json": "{\"http\":{\"name\":\"envoy.zipkin\",\"config\":{\"collector_cluster\":\"zipkin\",\"collector_endpoint\":\"/api/v1/spans\",\"shared_span_context\":false}}}",
 				},
@@ -90,7 +98,7 @@ func TestProxyDefaults_MatchesConsul(t *testing.T) {
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			require.True(t, c.Ours.MatchesConsul(c.Theirs))
+			require.True(t, c.Ours.MatchesConsul(c.Theirs, ""))
 		})
 	}
 }
@@ -110,6 +118,10 @@ func TestProxyDefaults_ToConsul(t *testing.T) {
 			Exp: &capi.ProxyConfigEntry{
 				Name: "name",
 				Kind: capi.ProxyDefaults,
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 			},
 		},
 		"every field set": {
@@ -142,9 +154,12 @@ func TestProxyDefaults_ToConsul(t *testing.T) {
 				},
 			},
 			Exp: &capi.ProxyConfigEntry{
-				Kind:      capi.ProxyDefaults,
-				Name:      "name",
-				Namespace: "",
+				Kind: capi.ProxyDefaults,
+				Name: "name",
+				Meta: map[string]string{
+					common.SourceKey:     common.SourceValue,
+					common.DatacenterKey: "test-dc",
+				},
 				Config: map[string]interface{}{
 					"envoy_tracing_json": "{\"http\":{\"name\":\"envoy.zipkin\",\"config\":{\"collector_cluster\":\"zipkin\",\"collector_endpoint\":\"/api/v1/spans\",\"shared_span_context\":false}}}",
 				},
@@ -173,7 +188,7 @@ func TestProxyDefaults_ToConsul(t *testing.T) {
 	}
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			act := c.Ours.ToConsul()
+			act := c.Ours.ToConsul("test-dc")
 			resolver, ok := act.(*capi.ProxyConfigEntry)
 			require.True(t, ok, "could not cast")
 			require.Equal(t, c.Exp, resolver)
@@ -224,6 +239,66 @@ func TestProxyDefaults_ValidateConfigInvalid(t *testing.T) {
 		}
 		t.Run(name, func(t *testing.T) {
 			require.Contains(t, proxyDefaults.validateConfig(field.NewPath("spec")).Detail, "must be valid map value")
+		})
+	}
+}
+
+func TestProxyDefaults_MatchesDatacenter(t *testing.T) {
+	cases := map[string]struct {
+		ConfigEntry    *capi.ProxyConfigEntry
+		DatacenterName string
+		Matches        bool
+	}{
+		"Datacenter empty": {
+			ConfigEntry: &capi.ProxyConfigEntry{
+				Kind: capi.ProxyDefaults,
+				Name: common.Global,
+				Meta: map[string]string{
+					common.DatacenterKey: "this-datacenter",
+				},
+			},
+			DatacenterName: "",
+			Matches:        false,
+		},
+		"Metadata empty": {
+			ConfigEntry: &capi.ProxyConfigEntry{
+				Kind: capi.ProxyDefaults,
+				Name: common.Global,
+				Meta: map[string]string{
+					common.DatacenterKey: "",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        false,
+		},
+		"Different values": {
+			ConfigEntry: &capi.ProxyConfigEntry{
+				Kind: capi.ProxyDefaults,
+				Name: common.Global,
+				Meta: map[string]string{
+					common.DatacenterKey: "other-datacenter",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        false,
+		},
+		"Matches": {
+			ConfigEntry: &capi.ProxyConfigEntry{
+				Kind: capi.ProxyDefaults,
+				Name: common.Global,
+				Meta: map[string]string{
+					common.DatacenterKey: "this-datacenter",
+				},
+			},
+			DatacenterName: "this-datacenter",
+			Matches:        true,
+		},
+	}
+
+	for name, test := range cases {
+		proxyDefault := &ProxyDefaults{}
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, proxyDefault.MatchesDatacenter(test.ConfigEntry, test.DatacenterName), test.Matches)
 		})
 	}
 }

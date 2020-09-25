@@ -26,6 +26,7 @@ type Command struct {
 	httpFlags *flags.HTTPFlags
 
 	flagMetricsAddr          string
+	flagDatacenterName       string
 	flagWebhookTLSCertDir    string
 	flagEnableLeaderElection bool
 	flagEnableWebhooks       bool
@@ -58,10 +59,11 @@ func (c *Command) init() {
 	c.flagSet.BoolVar(&c.flagEnableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	c.flagSet.StringVar(&c.flagDatacenterName, "datacenter-name", "", "The name of the consul datacenter")
 	c.flagSet.BoolVar(&c.flagEnableNamespaces, "enable-namespaces", false,
 		"[Enterprise Only] Enables Consul Enterprise namespaces, in either a single Consul namespace or mirrored.")
 	c.flagSet.StringVar(&c.flagConsulDestinationNamespace, "consul-destination-namespace", "default",
-		"[Enterprise Only] Defines which Consul namespace to create all config entries in, regardless of their source Kubernetes namespace."+
+		"[Enterprise Only] Defines which Consul namespace to create all config entries in, regardless of their source SourceValue namespace."+
 			" If '-enable-k8s-namespace-mirroring' is true, this is not used.")
 	c.flagSet.BoolVar(&c.flagEnableNSMirroring, "enable-k8s-namespace-mirroring", false, "[Enterprise Only] Enables "+
 		"k8s namespace mirroring.")
@@ -90,6 +92,9 @@ func (c *Command) Run(args []string) int {
 	if len(c.flagSet.Args()) > 0 {
 		c.UI.Error("Invalid arguments: should have no non-flag arguments")
 		return 1
+	}
+	if c.flagDatacenterName == "" {
+		c.UI.Error("Invalid arguments: -datacenter-name must be set")
 	}
 	if c.flagEnableWebhooks && c.flagWebhookTLSCertDir == "" {
 		c.UI.Error("Invalid arguments: -webhook-tls-cert-dir must be set")
@@ -121,6 +126,7 @@ func (c *Command) Run(args []string) int {
 		EnableNSMirroring:          c.flagEnableNSMirroring,
 		NSMirroringPrefix:          c.flagNSMirroringPrefix,
 		CrossNSACLPolicy:           c.flagCrossNSACLPolicy,
+		DatacenterName:             c.flagDatacenterName,
 	}
 	if err = (&controllers.ServiceDefaultsController{
 		ConfigEntryController: configEntryReconciler,
@@ -201,10 +207,10 @@ func (c *Command) Synopsis() string {
 	return synopsis
 }
 
-const synopsis = "Starts the Consul Kubernetes controller"
+const synopsis = "Starts the Consul SourceValue controller"
 const help = `
 Usage: consul-k8s controller [options]
 
-  Starts the Consul Kubernetes controller that manages Consul Custom Resource Definitions
+  Starts the Consul SourceValue controller that manages Consul Custom Resource Definitions
 
 `

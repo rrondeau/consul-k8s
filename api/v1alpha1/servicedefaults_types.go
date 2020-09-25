@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"strings"
 
+	"github.com/hashicorp/consul-k8s/api/common"
 	capi "github.com/hashicorp/consul/api"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -115,10 +116,14 @@ func init() {
 }
 
 // ToConsul converts the entry into it's Consul equivalent struct.
-func (in *ServiceDefaults) ToConsul() capi.ConfigEntry {
+func (in *ServiceDefaults) ToConsul(dc string) capi.ConfigEntry {
 	return &capi.ServiceConfigEntry{
-		Kind:        in.ConsulKind(),
-		Name:        in.Name(),
+		Kind: in.ConsulKind(),
+		Name: in.Name(),
+		Meta: map[string]string{
+			common.SourceKey:     common.SourceValue,
+			common.DatacenterKey: dc,
+		},
 		Protocol:    in.Spec.Protocol,
 		MeshGateway: in.Spec.MeshGateway.toConsul(),
 		Expose:      in.Spec.Expose.toConsul(),
@@ -147,7 +152,7 @@ func (in *ServiceDefaults) Validate() error {
 }
 
 // MatchesConsul returns true if entry has the same config as this struct.
-func (in *ServiceDefaults) MatchesConsul(candidate capi.ConfigEntry) bool {
+func (in *ServiceDefaults) MatchesConsul(candidate capi.ConfigEntry, datacenter string) bool {
 	serviceDefaultsCandidate, ok := candidate.(*capi.ServiceConfigEntry)
 	if !ok {
 		return false
@@ -156,7 +161,16 @@ func (in *ServiceDefaults) MatchesConsul(candidate capi.ConfigEntry) bool {
 		in.Spec.Protocol == serviceDefaultsCandidate.Protocol &&
 		in.Spec.MeshGateway.Mode == string(serviceDefaultsCandidate.MeshGateway.Mode) &&
 		in.Spec.Expose.matches(serviceDefaultsCandidate.Expose) &&
-		in.Spec.ExternalSNI == serviceDefaultsCandidate.ExternalSNI
+		in.Spec.ExternalSNI == serviceDefaultsCandidate.ExternalSNI &&
+		datacenter == serviceDefaultsCandidate.Meta[common.DatacenterKey]
+}
+
+func (in *ServiceDefaults) MatchesDatacenter(candidate capi.ConfigEntry, datacenter string) bool {
+	proxyDefCand, ok := candidate.(*capi.ServiceConfigEntry)
+	if !ok {
+		return false
+	}
+	return proxyDefCand.Meta[common.DatacenterKey] == datacenter
 }
 
 // ExposeConfig describes HTTP paths to expose through Envoy outside of Connect.

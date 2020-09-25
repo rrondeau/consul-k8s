@@ -13,7 +13,7 @@ import (
 // ConfigEntryLister is implemented by CRD-specific webhooks.
 type ConfigEntryLister interface {
 	// List returns all resources of this type across all namespaces in a
-	// Kubernetes cluster.
+	// SourceValue cluster.
 	List(ctx context.Context) ([]ConfigEntryResource, error)
 }
 
