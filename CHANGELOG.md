@@ -1,5 +1,12 @@
 ## UNRELEASED
 
+BUG FIXES:
+
+* CRDs: Fix Consul Enterprise bug for `ServiceIntentions` where not specifying the `destination.namespace`
+  or `sources[].namespace` fields would result in errors syncing the config entry
+  to Consul. After this fix, leaving those fields unset will default them to the
+  Kubernetes namespace. [[GH-362](https://github.com/hashicorp/consul-k8s/pull/362)]
+
 ## 0.19.0 (October 12, 2020)
 
 FEATURES:
