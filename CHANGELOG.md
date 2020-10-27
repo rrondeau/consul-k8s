@@ -1,5 +1,9 @@
 ## UNRELEASED
 
+BUG FIXES:
+* CRDs: Ensure ACL token is global so that secondary DC's can manage custom resources.
+  Without this fix, controllers running in secondary datacenters would get ACL errors. [[GH-369](https://github.com/hashicorp/consul-k8s/pull/369)]
+
 ## 0.19.0 (October 12, 2020)
 
 FEATURES:
