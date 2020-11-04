@@ -594,7 +594,7 @@ func TestServiceResolver_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				"serviceresolver.consul.hashicorp.com \"foo\" is invalid: spec.redirect.namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set redirect.namespace",
+				"serviceresolver.consul.hashicorp.com \"foo\" is invalid: spec.redirect.namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set redirect.namespace",
 			},
 		},
 		"namespaces disabled: single failover namespace specified": {
@@ -611,7 +611,7 @@ func TestServiceResolver_Validate(t *testing.T) {
 				},
 			},
 			expectedErrMsgs: []string{
-				"serviceresolver.consul.hashicorp.com \"foo\" is invalid: spec.failover[failA].namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set failover.namespace",
+				"serviceresolver.consul.hashicorp.com \"foo\" is invalid: spec.failover[failA].namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set failover.namespace",
 			},
 			namespacesEnabled: false,
 		},
@@ -633,8 +633,8 @@ func TestServiceResolver_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				"spec.failover[failA].namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set failover.namespace",
-				"spec.failover[failB].namespace: Invalid value: \"namespaceB\": consul namespaces must be enabled to set failover.namespace",
+				"spec.failover[failA].namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set failover.namespace",
+				"spec.failover[failB].namespace: Invalid value: \"namespaceB\": Consul Enterprise namespaces must be enabled to set failover.namespace",
 			},
 		},
 	}

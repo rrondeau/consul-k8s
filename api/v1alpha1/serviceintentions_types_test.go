@@ -833,7 +833,7 @@ func TestServiceIntentions_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				`serviceintentions.consul.hashicorp.com "does-not-matter" is invalid: spec.destination.namespace: Invalid value: "namespaceA": consul namespaces must be enabled to set destination.namespace`,
+				`serviceintentions.consul.hashicorp.com "does-not-matter" is invalid: spec.destination.namespace: Invalid value: "namespaceA": Consul Enterprise namespaces must be enabled to set destination.namespace`,
 			},
 		},
 		"namespaces disabled: single source namespace specified": {
@@ -856,7 +856,7 @@ func TestServiceIntentions_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				`serviceintentions.consul.hashicorp.com "does-not-matter" is invalid: spec.sources[0].namespace: Invalid value: "namespaceA": consul namespaces must be enabled to set source.namespace`,
+				`serviceintentions.consul.hashicorp.com "does-not-matter" is invalid: spec.sources[0].namespace: Invalid value: "namespaceA": Consul Enterprise namespaces must be enabled to set source.namespace`,
 			},
 		},
 		"namespaces disabled: multiple source namespaces specified": {
@@ -888,9 +888,9 @@ func TestServiceIntentions_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				`spec.sources[0].namespace: Invalid value: "namespaceA": consul namespaces must be enabled to set source.namespace`,
-				`spec.sources[1].namespace: Invalid value: "namespaceB": consul namespaces must be enabled to set source.namespace`,
-				`spec.sources[2].namespace: Invalid value: "namespaceC": consul namespaces must be enabled to set source.namespace`,
+				`spec.sources[0].namespace: Invalid value: "namespaceA": Consul Enterprise namespaces must be enabled to set source.namespace`,
+				`spec.sources[1].namespace: Invalid value: "namespaceB": Consul Enterprise namespaces must be enabled to set source.namespace`,
+				`spec.sources[2].namespace: Invalid value: "namespaceC": Consul Enterprise namespaces must be enabled to set source.namespace`,
 			},
 		},
 		"namespaces disabled: destination and multiple source namespaces specified": {
@@ -923,10 +923,10 @@ func TestServiceIntentions_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				`spec.destination.namespace: Invalid value: "namespaceA": consul namespaces must be enabled to set destination.namespace`,
-				`spec.sources[0].namespace: Invalid value: "namespaceB": consul namespaces must be enabled to set source.namespace`,
-				`spec.sources[1].namespace: Invalid value: "namespaceC": consul namespaces must be enabled to set source.namespace`,
-				`spec.sources[2].namespace: Invalid value: "namespaceD": consul namespaces must be enabled to set source.namespace`,
+				`spec.destination.namespace: Invalid value: "namespaceA": Consul Enterprise namespaces must be enabled to set destination.namespace`,
+				`spec.sources[0].namespace: Invalid value: "namespaceB": Consul Enterprise namespaces must be enabled to set source.namespace`,
+				`spec.sources[1].namespace: Invalid value: "namespaceC": Consul Enterprise namespaces must be enabled to set source.namespace`,
+				`spec.sources[2].namespace: Invalid value: "namespaceD": Consul Enterprise namespaces must be enabled to set source.namespace`,
 			},
 		},
 	}

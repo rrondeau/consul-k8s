@@ -385,7 +385,7 @@ func TestServiceSplitter_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				"servicesplitter.consul.hashicorp.com \"foo\" is invalid: spec.splits[0].namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set split.namespace",
+				"servicesplitter.consul.hashicorp.com \"foo\" is invalid: spec.splits[0].namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set split.namespace",
 			},
 		},
 		"namespaces disabled: multiple split namespaces specified": {
@@ -408,8 +408,8 @@ func TestServiceSplitter_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				"spec.splits[0].namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set split.namespace",
-				"spec.splits[1].namespace: Invalid value: \"namespaceB\": consul namespaces must be enabled to set split.namespace",
+				"spec.splits[0].namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set split.namespace",
+				"spec.splits[1].namespace: Invalid value: \"namespaceB\": Consul Enterprise namespaces must be enabled to set split.namespace",
 			},
 		},
 	}

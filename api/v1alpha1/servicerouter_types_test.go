@@ -554,7 +554,7 @@ func TestServiceRouter_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				"servicerouter.consul.hashicorp.com \"foo\" is invalid: spec.routes[0].destination.namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set destination.namespace",
+				"servicerouter.consul.hashicorp.com \"foo\" is invalid: spec.routes[0].destination.namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set destination.namespace",
 			},
 		},
 		"namespaces disabled: multiple destination namespaces specified": {
@@ -579,8 +579,8 @@ func TestServiceRouter_Validate(t *testing.T) {
 			},
 			namespacesEnabled: false,
 			expectedErrMsgs: []string{
-				"spec.routes[0].destination.namespace: Invalid value: \"namespaceA\": consul namespaces must be enabled to set destination.namespace",
-				"spec.routes[1].destination.namespace: Invalid value: \"namespaceB\": consul namespaces must be enabled to set destination.namespace",
+				"spec.routes[0].destination.namespace: Invalid value: \"namespaceA\": Consul Enterprise namespaces must be enabled to set destination.namespace",
+				"spec.routes[1].destination.namespace: Invalid value: \"namespaceB\": Consul Enterprise namespaces must be enabled to set destination.namespace",
 			},
 		},
 	}
